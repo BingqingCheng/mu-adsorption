@@ -1,0 +1,7 @@
+python ../get-sk-3d-singlecomponent-z.py
+
+wait
+
+bash ../get-avg-Sk.sh
+
+wait

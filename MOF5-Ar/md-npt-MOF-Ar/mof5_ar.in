@@ -1,0 +1,65 @@
+clear
+units real # A, fs, kcal/mol, atm
+boundary p p p
+atom_style full
+read_data mof5_SSSSS_ar_NNNNN.data
+
+#region void block 5 10 5 10 5 10
+#create_atoms 8 single 0 0 5
+#create_atoms 8 random 10 12345 void
+
+neighbor 2.0 bin
+
+group gas type 8
+
+include ../mof5_ar.pp
+
+timestep 1
+
+thermo_style custom step time temp press pe ke etotal enthalpy vol
+thermo 100
+
+
+min_style cg
+min_modify line quadratic
+minimize 1.0e-5 1.0e-3 100 100
+
+
+## temperature settings
+variable T1 equal 370
+variable T2 equal 370
+#
+## pressure settings
+#variable p1 equal 9869.2327*0 # Convert GPa to atm
+#
+velocity       all create ${T1} 2431 dist gaussian mom yes rot yes
+#
+#fix 1 all nph iso 1 1 100
+#fix 2 all temp/csvr ${T1} ${T1} 1 5731
+#
+
+fix 1 all npt temp ${T1} ${T1} 10 iso 1 1 100
+#fix 1 all nvt temp ${T1} ${T1} 10
+run 10000
+
+compute 1 gas msd com yes
+
+variable t equal time
+variable dh equal c_1[4]
+
+fix msd all print 100 "$t ${dh}" file ar.msd
+
+dump 1 gas custom 1000 out-Ar.lammpstrj element x y z
+dump_modify 1 element O Zn O C C C H Ar sort id
+
+
+dump 2 all custom 100000 out.lammpstrj element x y z
+dump_modify 2 element O Zn O C C C H Ar sort id
+
+run 2000000
+unfix 1
+#unfix 2
+
+write_data eq.data
+
+

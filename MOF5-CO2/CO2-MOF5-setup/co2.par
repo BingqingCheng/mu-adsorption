@@ -1,0 +1,41 @@
+HASH: 880c360f-9909-4ced-9a3c-f7311d4b8a15
+FF MOF-FF
+
+radfact         1.0
+radrule         arithmetic
+epsrule         geometric
+coul12          1.0
+coul13          1.0
+coul14          1.0
+vdw12           0.0
+vdw13           0.0
+vdw14           1.0
+chargetype      gaussian
+cutoff          12.0
+vdwtype         exp6_damped
+cut_lj_inner    10.0
+cut_lj          12.0
+coreshell       False
+
+bnd_type 1
+1                      mm3           14.0           1.162           # mm3->(c2_o2@co2m,o1_c1@co2m)|co2m
+
+ang_type 1
+1                      mm3           0.75           180.0           # mm3->(o1_c1@co2m,c2_o2@co2m,o1_c1@co2m)|co2m
+
+dih_type 0
+
+oop_type 0
+
+cha_type 2
+1                 gaussian       0.6512      1.163           # gaussian->(c2_o2@co2m)|co2m
+2                 gaussian      -0.3256      1.118           # gaussian->(o1_c1@co2m)|co2m
+
+vdw_type 2
+1                   buck6d      1.58392      0.046305       # buck6d->(c2_o2@co2m)|co2m
+2                   buck6d      1.73232      0.13574        # buck6d->(o1_c1@co2m)|co2m
+
+vdwpr_type 0
+
+chapr_type 0
+

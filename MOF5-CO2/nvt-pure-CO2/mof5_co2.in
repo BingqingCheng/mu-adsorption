@@ -1,0 +1,60 @@
+clear
+units real # A, fs, kcal/mol, atm
+boundary p p p
+atom_style full
+read_data ../../pure-CO2-setup/co2_NNNNN.data
+
+
+neighbor 2.0 bin
+
+group gas type 1
+
+include ../co2.pp
+
+timestep 0.1
+
+thermo_style custom step time temp press pe ke etotal enthalpy vol
+thermo 100
+
+
+min_style cg
+min_modify line quadratic
+minimize 1.0e-5 1.0e-3 100 100
+
+
+## temperature settings
+variable T1 equal TTTTT
+#
+## pressure settings
+#variable p1 equal 9869.2327*0 # Convert GPa to atm
+#
+velocity       all create ${T1} 2431 dist gaussian mom yes rot yes
+#
+
+fix 1 all nve
+fix 2 all temp/csvr ${T1} ${T1} 1 5731
+fix 3 all langevin ${T1} ${T1} 500.0 48279
+
+run 40000
+
+compute 1 gas msd com yes
+
+variable t equal time
+variable dh equal c_1[4]
+
+fix msd all print 100 "$t ${dh}" file co2.msd
+
+dump 1 gas custom 1000 out-co2.lammpstrj element x y z
+dump_modify 1 element C O sort id
+
+
+dump 2 all custom 100000 out-all.lammpstrj element x y z
+dump_modify 2 element C O sort id
+
+run 5000000
+unfix 1
+#unfix 2
+
+write_data eq.data
+
+

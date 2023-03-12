@@ -1,0 +1,81 @@
+units          real   # units of energy kcal/mol, distance angstrom and time in femtosecond
+atom_style     atomic   # do not change
+boundary       p p p  # periodic boundary conditions in x y z 
+
+variable dt equal 2
+variable temper equal TTTTT
+
+read_data  ../CNT-12-12.data
+
+# radius of CNT-12-12: 8.14A
+region insidecnt cylinder z 0 0 5 INF INF
+region boundcnt cylinder z 0 0 8.15 INF INF
+
+# the volume inside is about 3.14*(6-7)**2.*9.8 = 1107-1500 A^3
+# one water molecule at experimental density occupies 29.7 A^3
+# so at experimental density this CNT holds about 30-60 molecules
+
+variable nnew equal NNNNN
+create_atoms 1 random ${nnew} 90789 insidecnt
+create_atoms 3 random 1 909 insidecnt
+
+group          mW       type 1 3
+group          C        type 2
+newton         on               # do not change
+
+#pair_style sw
+#pair_coeff * * ../mW.sw mW C He
+
+pair_style hybrid/scaled WWWWW sw HHHHH sw
+pair_coeff * * sw 1 ../mW.sw mW C He
+pair_coeff * * sw 2 ../mW-nointer.sw mW C He
+
+neighbor       2.0 bin
+neigh_modify exclude group C C
+neigh_modify check yes delay 1
+fix fMin C setforce 0 0 0
+
+fix wall mW wall/region boundcnt morse 10.0 1.0 1.5 0.5
+
+
+timestep       ${dt}     # time step for the integration of the equations of motion, in femtoseconds 
+
+thermo_style   custom step temp pe etotal enthalpy press pxx pyy pzz
+thermo         100  # how often (in steps) will write the properties of thermo_style to the output
+
+min_style cg
+min_modify line quadratic
+min_modify dmax 0.02
+minimize 1.0e-5 1.0e-3 1000 1000
+
+#velocity        mW create ${temper} 2148459 rot yes mom yes dist gaussian # assign initial velocities to the particles
+
+
+#fix             1 mW nve
+#fix             2 mW temp/csvr ${temper} ${temper} 100.0 54324
+fix             2 mW nvt temp ${temper} ${temper} 100.0
+fix             3 mW langevin ${temper} ${temper} 500.0 48279
+
+# equilibrate
+run             10000
+reset_timestep  0
+
+compute sw1 all pair sw 1
+compute sw2 all pair sw 2
+
+variable t equal time
+variable pe1 equal c_sw1
+variable pe2 equal c_sw2
+
+fix pedif all print 100 "$t ${pe1} ${pe2}" file pe.list
+
+# -----------------------------  collect trajectory -------------------------------
+
+dump 1 all custom 50000 mW.lammpstrj element x y z # dump configuration into a trajectory file
+dump_modify 1 element mW C He sort id
+
+run             5000000      # runs this number of steps of simulation
+
+undump         1
+
+write_data   restart.data 

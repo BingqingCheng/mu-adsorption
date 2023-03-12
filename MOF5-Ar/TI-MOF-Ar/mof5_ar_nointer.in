@@ -1,0 +1,23 @@
+clear
+units real # A, fs, kcal/mol, atm
+boundary p p p
+atom_style full
+read_data ../mof5_1ar.data
+
+neighbor 2.0 bin
+
+group gas type 8
+
+include ../mof5_ar_nointer.pp
+
+timestep 1
+
+thermo_style custom step time temp press pe ke etotal enthalpy vol
+thermo 10
+
+fix 1 all ipi MOF-Ar_nointer-HHHHH-RRRRR 32346 unix
+run 10000000
+
+
+
+

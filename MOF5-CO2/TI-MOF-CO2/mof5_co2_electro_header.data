@@ -1,0 +1,23 @@
+LAMMPS data file for mol object with MOF-FF params from www.mofplus.org
+
+     NNNNN atoms
+         9 atom types
+
+    0.000000   26.030055  xlo xhi
+    0.000000   26.030055  ylo yhi
+    0.000000   26.030055  zlo zhi
+
+Masses
+
+    1    15.9994 # buck6d->(o4_zn4@zn4o)|Zn4O_benz/gaussian->(o4_zn4@zn4o)|Zn4O_benz
+    2    65.3800 # buck6d->(zn4_o4@zn4o)|Zn4O_benz/gaussian->(zn4_o4@zn4o)|Zn4O_benz
+    3    15.9994 # buck6d->(o2_c1zn1@co2)|Zn4O_benz/gaussian->(o2_c1zn1@co2)|Zn4O_benz
+    4    12.0107 # buck6d->(c3_c1o2@co2)|Zn4O_benz/gaussian->(c3_c1o2@co2)|Zn4O_benz
+    5    12.0107 # buck6d->(c3_c2h1@ph)|benzene/gaussian->(c3_c2h1@ph)|benzene
+    6    12.0107 # buck6d->(c3_c2h1@ph)|benzene/gaussian->(c3_c3@ph)|Zn4O_benz
+    7     1.0079 # buck6d->(h1_c1@ph)|benzene/gaussian->(h1_c1@ph)|benzene
+    8    12.0107 # buck6d->(c2_o2@co2m)|co2m/gaussian->(c2_o2@co2m)|co2m
+    9    15.9994 # buck6d->(o1_c1@co2m)|co2m/gaussian->(o1_c1@co2m)|co2m
+
+Atoms
+

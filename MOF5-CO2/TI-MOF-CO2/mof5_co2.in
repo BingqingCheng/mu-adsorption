@@ -1,0 +1,21 @@
+clear
+units real # A, fs, kcal/mol, atm
+boundary p p p
+atom_style full
+read_data ../mof5_co2.data
+
+neighbor 2.0 bin
+
+include ../mof5_co2.pp
+
+timestep 1
+
+thermo_style custom step pe evdwl ecoul ebond eangle edihed elong
+thermo 10
+
+fix 1 all ipi MOF-co2-WWWWW-RRRRR 32346 unix
+run 10000000
+
+
+
+

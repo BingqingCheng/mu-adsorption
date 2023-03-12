@@ -1,0 +1,88 @@
+units          real   # units of energy kcal/mol, distance angstrom and time in femtosecond
+atom_style     atomic   # do not change
+boundary       p p p  # periodic boundary conditions in x y z 
+
+variable temper equal TTTTT
+variable dt equal 2
+
+read_data  ../CNT-12-12.data
+
+# radius of CNT-12-12: 8.14A
+region insidecnt cylinder z 0 0 5 INF INF
+region boundcnt cylinder z 0 0 8.15 INF INF
+
+# the volume inside is about 3.14*(6-7)**2.*9.8 = 1107-1500 A^3
+# one water molecule at experimental density occupies 29.7 A^3
+# so at experimental density this CNT holds about 30-60 molecules
+
+create_atoms 1 random NNNNN 90789 insidecnt
+
+mass           1 18.015
+mass           2 12.011
+
+group          mW       type 1
+group          C        type 2
+newton         on               # do not change
+pair_style sw
+pair_coeff * * ../mW.sw mW C
+neighbor       2.0 bin
+neigh_modify exclude group C C
+neigh_modify check yes delay 1
+fix fMin C setforce 0 0 0
+
+fix wall mW wall/region boundcnt morse 10.0 1.0 1.5 0.5
+
+dump eqd all custom 20 mW-eq.lammpstrj element x y z # dump configuration into a trajectory file
+dump_modify eqd element mW C sort id
+
+min_style cg
+min_modify line quadratic
+min_modify dmax 0.02
+minimize 1.0e-5 1.0e-3 1000 1000
+
+undump eqd
+
+replicate 1 1 24
+
+group          mW       type 1
+group          C        type 2
+
+
+timestep       ${dt}     # time step for the integration of the equations of motion, in femtoseconds 
+
+thermo_style   custom step temp pe etotal enthalpy press pxx pyy pzz
+#thermo_modify  flush yes  # flush the buffer and write the output in real time
+thermo         200  # how often (in steps) will write the properties of thermo_style to the output
+
+velocity        mW create ${temper} 2148459 rot yes mom yes dist gaussian # assign initial velocities to the particles
+
+
+#fix             1 mW nve
+#fix             2 mW temp/csvr ${temper} ${temper} 100.0 54324
+fix             1 mW nvt temp ${temper} ${temper} 100.0
+
+# equilibrate
+run             100000
+reset_timestep  0
+
+
+compute 1 mW msd com yes
+
+variable t equal time
+variable dh equal c_1[4]
+
+fix msd all print 1000 "$t ${dh}" file water.msd
+
+# -----------------------------  collect trajectory -------------------------------
+
+dump 1 all custom 1000 mW.lammpstrj element x y z # dump configuration into a trajectory file
+dump_modify 1 element mW C sort id
+
+run             5000000      # runs this number of steps of simulation
+
+
+#unfix           2
+unfix          1        # undo the dump of the trajectory
+undump         1
+
+write_data   restart.data  
